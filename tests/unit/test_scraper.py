@@ -11,29 +11,32 @@ from scraper.scrape import (
     get_primary_data,
 )
 
+EMPTY_BOX = "<div></div>"
+HTML_PARSER = "html.parser"
+
 
 def test_is_recorded_council_file():
-    soup = BeautifulSoup("<div><p>Paragraph</p></div>", "html.parser")
+    soup = BeautifulSoup("<div><p>Paragraph</p></div>", HTML_PARSER)
     assert not is_recorded_council_file(soup)
 
-    soup = BeautifulSoup("<div><div id='viewrecord'></div></div>", "html.parser")
+    soup = BeautifulSoup("<div><div id='viewrecord'></div></div>", HTML_PARSER)
     assert is_recorded_council_file(soup)
 
 
 def test_get_counil_file_id():
     soup = BeautifulSoup(
         "<h1 id='CouncilFileHeader'><font class='cfheader'>Council File: 99-9999</font></h1>",
-        "html.parser",
+        HTML_PARSER,
     )
     assert get_counil_file_id(soup) == "99-9999"
 
-    soup = BeautifulSoup("<h1 id='CouncilFileHeader'></h1>", "html.parser")
+    soup = BeautifulSoup("<h1 id='CouncilFileHeader'></h1>", HTML_PARSER)
     assert get_counil_file_id(soup) is None
 
 
 def test_get_activities():
-    activies_box = BeautifulSoup("<div></div>", "html.parser")
-    primary_data_box = BeautifulSoup("<div></div>", "html.parser")
+    activies_box = BeautifulSoup(EMPTY_BOX, HTML_PARSER)
+    primary_data_box = BeautifulSoup(EMPTY_BOX, HTML_PARSER)
     assert get_activities(activies_box, primary_data_box) == []
 
     activies_box = BeautifulSoup(
@@ -48,9 +51,9 @@ def test_get_activities():
             </table>
         </div>
         """,
-        "html.parser",
+        HTML_PARSER,
     )
-    primary_data_box = BeautifulSoup("<div></div>", "html.parser")
+    primary_data_box = BeautifulSoup(EMPTY_BOX, HTML_PARSER)
     assert get_activities(activies_box, primary_data_box) == []
 
     activies_box = BeautifulSoup(
@@ -70,7 +73,7 @@ def test_get_activities():
             </table>
         </div>
         """,
-        "html.parser",
+        HTML_PARSER,
     )
     primary_data_box = BeautifulSoup(
         """
@@ -78,7 +81,7 @@ def test_get_activities():
             <div id='showtip_1'><a>Document 1</a><a>Document 2</a></div>
         </div>
         """,
-        "html.parser",
+        HTML_PARSER,
     )
     assert get_activities(activies_box, primary_data_box) == [
         {"date": "2023-05-09", "activity": "Activity", "documents": ["Document 1", "Document 2"]}
@@ -86,17 +89,17 @@ def test_get_activities():
 
 
 def test_get_references_number():
-    references_number_box = BeautifulSoup("<div></div>", "html.parser")
+    references_number_box = BeautifulSoup(EMPTY_BOX, HTML_PARSER)
     assert get_references_number(references_number_box) == {}
 
     references_number_box = BeautifulSoup(
         "<div>Number: 1234<br>Type: Test</div>",
-        "html.parser",
+        HTML_PARSER,
     )
     assert get_references_number(references_number_box) == {"number": "1234", "type": "Test"}
 
 def test_get_primary_data(primary_data_box_content):
-    primary_data_box = BeautifulSoup(primary_data_box_content, "html.parser")
+    primary_data_box = BeautifulSoup(primary_data_box_content, HTML_PARSER)
     expected_data = {
         "title": "4800 Block of Oak Park Avenue / Plan Amendment and Zone Change",
         "date_received_introduced": "01/29/2010",
